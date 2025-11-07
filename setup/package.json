@@ -1,6 +1,6 @@
 {
   "name": "pai-voice-server",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Installation package for PAI Voice Server - Text-to-speech notification service",
   "main": "install.js",
   "bin": {
