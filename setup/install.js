@@ -40,15 +40,20 @@ ${logger.colors.bright}COMMANDS${logger.colors.reset}
   verify       Verify installation integrity
 
 ${logger.colors.bright}OPTIONS${logger.colors.reset}
-  --dry-run    Preview changes without making them
-  --yes        Skip confirmation prompts
-  --verbose    Show detailed output
-  --help       Show this help message
-  --version    Show version information
+  --dry-run       Preview changes without making them
+  --yes           Skip confirmation prompts
+  --verbose       Show detailed output
+  --service-mode  Install with enhanced service features (crash recovery, separate logs)
+  -s              Short form of --service-mode
+  --help          Show this help message
+  --version       Show version information
 
 ${logger.colors.bright}EXAMPLES${logger.colors.reset}
   # Install the voice server
   pai-voice-server install
+
+  # Install with enhanced service mode (recommended for production)
+  pai-voice-server install --service-mode
 
   # Preview installation without making changes
   pai-voice-server install --dry-run
@@ -66,8 +71,8 @@ ${logger.colors.bright}EXAMPLES${logger.colors.reset}
   pai-voice-server uninstall --preserve-logs
 
 ${logger.colors.bright}DOCUMENTATION${logger.colors.reset}
-  Repository: https://github.com/pai/voice-server
-  Issues: https://github.com/pai/voice-server/issues
+  Repository: https://github.com/rsts-dev/pai-voice-server
+  Issues: https://github.com/rsts-dev/pai-voice-server/issues
 
 ${logger.colors.bright}INSTALLATION LOCATION${logger.colors.reset}
   Default: ~/.claude/pai-voice-server/
@@ -97,7 +102,8 @@ function parseArgs() {
       verbose: false,
       force: false,
       preserveLogs: false,
-      backup: false
+      backup: false,
+      serviceMode: false
     }
   };
 
@@ -141,6 +147,11 @@ function parseArgs() {
 
     if (arg === '--backup') {
       parsed.options.backup = true;
+      continue;
+    }
+
+    if (arg === '--service-mode' || arg === '-s') {
+      parsed.options.serviceMode = true;
       continue;
     }
 

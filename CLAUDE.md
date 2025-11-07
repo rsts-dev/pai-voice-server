@@ -39,8 +39,8 @@ npm publish                       # Publish package
 # Run server directly (development)
 bun run server.ts
 
-# Run via wrapper script
-./run-server.sh
+# Or use task runner
+task dev
 ```
 
 ### Service Management Commands
@@ -57,14 +57,9 @@ pai-voice-server verify           # Verify installation
 pai-voice-server uninstall        # Uninstall service
 ```
 
-**Using legacy scripts** (deprecated):
+**Service Mode Installation** (enhanced reliability):
 ```bash
-./install.sh                      # DEPRECATED - use npm
-./start.sh
-./stop.sh
-./restart.sh
-./status.sh
-./uninstall.sh
+pai-voice-server install --service-mode  # Crash recovery, separate logs
 ```
 
 ### Testing the API

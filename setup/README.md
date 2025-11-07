@@ -22,6 +22,25 @@ pai-voice-server install
 pai-voice-server install --dry-run
 ```
 
+### Service Mode Installation (Recommended for Production)
+
+Install with enhanced reliability features:
+
+```bash
+pai-voice-server install --service-mode
+```
+
+**Service mode includes:**
+- **Automatic crash recovery** - Service restarts if it crashes
+- **Throttled restarts** - 10-second interval prevents rapid restart loops
+- **Separate log files** - stdout and stderr logged separately for easier debugging
+- **Explicit port configuration** - PORT set in LaunchAgent environment
+
+**Log locations:**
+- Standard mode: `~/Library/Logs/pai-voice-server.log` (combined)
+- Service mode: `~/.claude/pai-voice-server/logs/voice-server.log` (stdout)
+- Service mode: `~/.claude/pai-voice-server/logs/voice-server-error.log` (stderr)
+
 ## Usage
 
 ### Commands
@@ -55,6 +74,7 @@ pai-voice-server uninstall --backup   # Create backup before removal
 - `--yes`, `-y` - Skip confirmation prompts
 - `--verbose` - Show detailed output
 - `--force`, `-f` - Force operation (install/update)
+- `--service-mode`, `-s` - Install with enhanced service features (crash recovery, separate logs)
 - `--help`, `-h` - Show help message
 - `--version`, `-v` - Show version information
 

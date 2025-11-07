@@ -42,8 +42,13 @@ Replace `your_api_key_here` with your actual API key from Step 2.
 ## Step 4: Install the Voice Server
 
 ```bash
-cd ${PAI_DIR}/voice-server
-./install.sh
+npm install -g pai-voice-server
+pai-voice-server install
+```
+
+For production use with enhanced reliability:
+```bash
+pai-voice-server install --service-mode
 ```
 
 This will:
@@ -80,7 +85,7 @@ The PAI system supports different voices for different agents:
 
 | Agent | Default Voice ID | Purpose |
 |-------|------------------|---------|
-| Kai | s3TPKV1kjDlVtZbl4Ksh | Main assistant voice |
+| Pai | s3TPKV1kjDlVtZbl4Ksh | Main assistant voice |
 | Perplexity-Researcher | AXdMgz6evoL7OPd7eU12 | Research agent |
 | Claude-Researcher | AXdMgz6evoL7OPd7eU12 | Research agent |
 | Engineer | kmSVBPu7loj4ayNinwWM | Development agent |

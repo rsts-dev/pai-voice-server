@@ -101,7 +101,7 @@ if [ -f ~/.env ]; then
             if grep -q "ELEVENLABS_VOICE_ID=" ~/.env 2>/dev/null; then
                 echo -e "${GREEN}✅ Custom voice ID configured${NC}"
             else
-                echo -e "${BLUE}ℹ️  Using default voice (Kai)${NC}"
+                echo -e "${BLUE}ℹ️  Using default voice (Pai)${NC}"
             fi
         fi
     else
@@ -120,12 +120,12 @@ echo "🚀 Checking Service Status:"
 echo ""
 
 # Check if service is installed
-if [ -f ~/Library/LaunchAgents/com.kainotify.voice-server.plist ]; then
+if [ -f ~/Library/LaunchAgents/com.pai.voice-server.plist ]; then
     echo -e "${GREEN}✅ Service is installed${NC}"
-    
+
     # Check if service is running
-    if launchctl list | grep -q "com.kainotify.voice-server"; then
-        STATUS_LINE=$(launchctl list | grep "com.kainotify.voice-server")
+    if launchctl list | grep -q "com.pai.voice-server"; then
+        STATUS_LINE=$(launchctl list | grep "com.pai.voice-server")
         PID=$(echo "$STATUS_LINE" | awk '{print $1}')
         
         if [ "$PID" != "-" ]; then
@@ -141,12 +141,12 @@ if [ -f ~/Library/LaunchAgents/com.kainotify.voice-server.plist ]; then
             fi
         else
             echo -e "${YELLOW}⚠️  Service is loaded but not running${NC}"
-            echo "   Start with: launchctl start com.kainotify.voice-server"
+            echo "   Start with: launchctl start com.pai.voice-server"
             WARNINGS_FOUND=$((WARNINGS_FOUND + 1))
         fi
     else
         echo -e "${YELLOW}⚠️  Service is installed but not loaded${NC}"
-        echo "   Load with: launchctl load ~/Library/LaunchAgents/com.kainotify.voice-server.plist"
+        echo "   Load with: launchctl load ~/Library/LaunchAgents/com.pai.voice-server.plist"
         WARNINGS_FOUND=$((WARNINGS_FOUND + 1))
     fi
 else

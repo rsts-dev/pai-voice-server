@@ -29,7 +29,7 @@ if (!ELEVENLABS_API_KEY) {
   console.error('Add: ELEVENLABS_API_KEY=your_key_here');
 }
 
-// Default voice ID (Kai's voice)
+// Default voice ID (Pai's voice)
 const DEFAULT_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "s3TPKV1kjDlVtZbl4Ksh";
 
 // Sanitize input for shell commands

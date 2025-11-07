@@ -75,25 +75,16 @@ pai-voice-server verify
 pai-voice-server uninstall
 ```
 
-### Method 2: Manual Installation (Alternative)
-
-If you prefer manual installation without NPM:
-
+**Enhanced Service Mode** (recommended for production):
 ```bash
-cd ~/.claude/pai-voice-server
-./install.sh
+pai-voice-server install --service-mode
 ```
 
-**Manual service management:**
-```bash
-./start.sh     # Start server
-./stop.sh      # Stop server
-./restart.sh   # Restart server
-./status.sh    # Check status
-./uninstall.sh # Uninstall
-```
-
-> **Note**: The manual scripts (`.sh` files) are deprecated and will be removed in a future version. Please use the NPM installation method.
+Service mode features:
+- Automatic crash recovery
+- Throttled restart prevention (10s interval)
+- Separate stdout/stderr logs
+- Explicit port configuration
 
 ## 📡 API Usage
 
@@ -117,7 +108,7 @@ curl -X POST http://localhost:8888/notify \
 ### Available Voice IDs
 ```javascript
 // PAI System Agents
-Kai:                     s3TPKV1kjDlVtZbl4Ksh  // Main assistant
+Pai:                     s3TPKV1kjDlVtZbl4Ksh  // Main assistant
 Perplexity-Researcher:   AXdMgz6evoL7OPd7eU12  // Perplexity research agent
 Claude-Researcher:       AXdMgz6evoL7OPd7eU12  // Claude research agent
 Gemini-Researcher:       iLVmqjzCGGvqtMCk6vVQ  // Gemini research agent
@@ -174,7 +165,7 @@ ELEVENLABS_API_KEY=your_api_key_here
 **Optional:**
 ```bash
 PORT=8888                                    # Server port (default: 8888)
-ELEVENLABS_VOICE_ID=s3TPKV1kjDlVtZbl4Ksh   # Default voice ID (Kai's voice)
+ELEVENLABS_VOICE_ID=s3TPKV1kjDlVtZbl4Ksh   # Default voice ID (Pai's voice)
 ```
 
 ### Voice Configuration (voices.json)
@@ -185,7 +176,7 @@ The `voices.json` file provides reference metadata for agent voices:
 {
   "default_rate": 175,
   "voices": {
-    "kai": {
+    "pai": {
       "voice_name": "Jamie (Premium)",
       "rate_multiplier": 1.3,
       "rate_wpm": 228,

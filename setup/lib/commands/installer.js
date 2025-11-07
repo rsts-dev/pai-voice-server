@@ -16,10 +16,11 @@ const paths = require('../core/paths');
  * @param {object} options - Installation options
  * @param {boolean} options.dryRun - Preview without making changes
  * @param {boolean} options.force - Force reinstall if already installed
+ * @param {boolean} options.serviceMode - Use enhanced service mode (crash recovery, separate logs)
  * @returns {Promise<object>} Installation result
  */
 async function install(options = {}) {
-  const { dryRun = false, force = false } = options;
+  const { dryRun = false, force = false, serviceMode = false } = options;
 
   logger.boxHeader('PAI Voice Server Installation');
   logger.newline();
@@ -100,11 +101,11 @@ async function install(options = {}) {
   }
 
   // Step 6: Create LaunchAgent
-  logger.info('Creating service...');
+  logger.info(`Creating service${serviceMode ? ' (service mode)' : ''}...`);
 
   try {
-    launchagent.createPlist({ dryRun });
-    logger.success('LaunchAgent created');
+    launchagent.createPlist({ dryRun, serviceMode });
+    logger.success(`LaunchAgent created${serviceMode ? ' with enhanced features' : ''}`);
   } catch (error) {
     logger.error(`Failed to create LaunchAgent: ${error.message}`);
     return { success: false, reason: 'launchagent_creation_failed', error: error.message };
@@ -151,7 +152,14 @@ async function install(options = {}) {
   logger.keyValue('Location', installPath);
   logger.keyValue('Service', manifest.getManifest().service.name);
   logger.keyValue('Port', manifest.getManifest().service.port);
-  logger.keyValue('Logs', paths.getLogPath());
+  logger.keyValue('Mode', serviceMode ? 'Service (enhanced)' : 'Standard');
+
+  if (serviceMode) {
+    logger.keyValue('Stdout Log', paths.getStdoutLogPath());
+    logger.keyValue('Stderr Log', paths.getStderrLogPath());
+  } else {
+    logger.keyValue('Logs', paths.getLogPath());
+  }
 
   logger.newline();
   logger.section('Next Steps');
@@ -160,7 +168,13 @@ async function install(options = {}) {
   logger.log('  • Send notification: curl -X POST http://localhost:8888/notify \\');
   logger.log('      -H "Content-Type: application/json" \\');
   logger.log('      -d \'{"message": "Hello from PAI"}\'');
-  logger.log('  • View logs: tail -f ' + paths.getLogPath());
+
+  if (serviceMode) {
+    logger.log('  • View logs: tail -f ' + paths.getStdoutLogPath());
+    logger.log('  • View errors: tail -f ' + paths.getStderrLogPath());
+  } else {
+    logger.log('  • View logs: tail -f ' + paths.getLogPath());
+  }
 
   if (!envCheck.checks.elevenLabs.configured) {
     logger.newline();

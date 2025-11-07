@@ -53,11 +53,35 @@ function getLaunchAgentPath() {
 }
 
 /**
- * Get log file path
+ * Get log file path (standard mode - combined stdout/stderr)
  * @returns {string} Path to log file
  */
 function getLogPath() {
   return expandHome('~/Library/Logs/pai-voice-server.log');
+}
+
+/**
+ * Get logs directory (service mode - separate log files)
+ * @returns {string} Path to logs directory
+ */
+function getLogsDir() {
+  return path.join(getInstallPath(), 'logs');
+}
+
+/**
+ * Get stdout log path (service mode)
+ * @returns {string} Path to stdout log file
+ */
+function getStdoutLogPath() {
+  return path.join(getLogsDir(), 'voice-server.log');
+}
+
+/**
+ * Get stderr log path (service mode)
+ * @returns {string} Path to stderr log file
+ */
+function getStderrLogPath() {
+  return path.join(getLogsDir(), 'voice-server-error.log');
 }
 
 /**
@@ -124,6 +148,9 @@ module.exports = {
   getInstallPath,
   getLaunchAgentPath,
   getLogPath,
+  getLogsDir,
+  getStdoutLogPath,
+  getStderrLogPath,
   getMetadataPath,
   getServerPath,
   getVoicesPath,

@@ -64,19 +64,84 @@ function generatePlist() {
 }
 
 /**
+ * Generate LaunchAgent plist content with enhanced service mode features
+ * Includes crash recovery, throttled restarts, and separate log files
+ * @returns {string} Plist XML content
+ */
+function generateServiceModePlist() {
+  const { service } = manifest.getManifest();
+  const serverPath = paths.getServerPath();
+  const bunPath = paths.getBunPath();
+  const stdoutLogPath = paths.getStdoutLogPath();
+  const stderrLogPath = paths.getStderrLogPath();
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>${service.name}</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>${bunPath}</string>
+        <string>run</string>
+        <string>${serverPath}</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>${paths.getInstallPath()}</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>StandardOutPath</key>
+    <string>${stdoutLogPath}</string>
+
+    <key>StandardErrorPath</key>
+    <string>${stderrLogPath}</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>${require('os').homedir()}</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${require('os').homedir()}/.bun/bin</string>
+        <key>PORT</key>
+        <string>${service.port}</string>
+    </dict>
+</dict>
+</plist>
+`;
+}
+
+/**
  * Create LaunchAgent plist file
  * @param {object} options - Options
  * @param {boolean} options.dryRun - If true, don't actually create
+ * @param {boolean} options.serviceMode - If true, use enhanced service mode
  * @returns {boolean} True if created
  */
 function createPlist(options = {}) {
-  const { dryRun = false } = options;
+  const { dryRun = false, serviceMode = false } = options;
   const plistPath = paths.getLaunchAgentPath();
 
-  logger.verbose(`Creating LaunchAgent plist: ${plistPath}`);
+  const mode = serviceMode ? 'service mode' : 'standard mode';
+  logger.verbose(`Creating LaunchAgent plist (${mode}): ${plistPath}`);
 
   if (dryRun) {
-    logger.verbose('  [DRY RUN] Would create plist file');
+    logger.verbose(`  [DRY RUN] Would create plist file in ${mode}`);
     return true;
   }
 
@@ -87,8 +152,16 @@ function createPlist(options = {}) {
       fs.mkdirSync(launchAgentsDir, { recursive: true });
     }
 
+    // Create logs directory if using service mode
+    if (serviceMode) {
+      const logsDir = paths.getLogsDir();
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+      }
+    }
+
     // Write plist file
-    const plistContent = generatePlist();
+    const plistContent = serviceMode ? generateServiceModePlist() : generatePlist();
     fs.writeFileSync(plistPath, plistContent, 'utf8');
 
     return true;
@@ -292,6 +365,7 @@ async function waitForStart(timeout = 10) {
 
 module.exports = {
   generatePlist,
+  generateServiceModePlist,
   createPlist,
   removePlist,
   load,
