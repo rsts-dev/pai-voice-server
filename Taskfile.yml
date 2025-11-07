@@ -42,25 +42,25 @@ tasks:
     cmds:
       - cd setup && npm test
 
-  test:unit:
+  "test:unit":
     desc: Run unit tests only
     deps: [install]
     cmds:
       - cd setup && npm run test:unit
 
-  test:integration:
+  "test:integration":
     desc: Run integration tests only
     deps: [install]
     cmds:
       - cd setup && npm run test:integration
 
-  test:watch:
+  "test:watch":
     desc: Run tests in watch mode
     deps: [install]
     cmds:
       - cd setup && npm run test:watch
 
-  test:coverage:
+  "test:coverage":
     desc: Run tests with coverage report
     deps: [install]
     cmds:
@@ -69,7 +69,7 @@ tasks:
 
   # === Testing CLI Locally ===
 
-  test:install:
+  "test:install":
     desc: Test installation locally (npm link)
     deps: [build]
     cmds:
@@ -77,7 +77,7 @@ tasks:
       - cd setup && npm link
       - 'echo "[OK] Package linked. Test with: pai-voice-server --help"'
 
-  test:cli:
+  "test:cli":
     desc: Test CLI commands with dry-run
     cmds:
       - 'echo "[TEST] Testing CLI commands..."'
@@ -87,7 +87,7 @@ tasks:
       - pai-voice-server status
       - 'echo "[OK] CLI tests passed"'
 
-  test:unlink:
+  "test:unlink":
     desc: Remove npm link after testing
     cmds:
       - cd setup && npm unlink
@@ -112,7 +112,7 @@ tasks:
       - rm -f *.log
       - 'echo "[OK] Cleaned build artifacts"'
 
-  clean:build:
+  "clean:build":
     desc: Clean dist directory only
     internal: true
     cmds:
@@ -126,13 +126,13 @@ tasks:
     cmds:
       - cd setup && npm run lint
 
-  lint:fix:
+  "lint:fix":
     desc: Auto-fix linting issues
     deps: [install]
     cmds:
       - cd setup && npm run lint:fix
 
-  security:audit:
+  "security:audit":
     desc: Run security audit
     deps: [install]
     cmds:
@@ -140,43 +140,40 @@ tasks:
 
   # === Version Management ===
 
-  version:patch:
+  "version:patch":
     desc: Bump patch version (1.0.x)
     cmds:
       - cd setup && npm version patch --no-git-tag-version
       - task: version:commit
 
-  version:minor:
+  "version:minor":
     desc: Bump minor version (1.x.0)
     cmds:
       - cd setup && npm version minor --no-git-tag-version
       - task: version:commit
 
-  version:major:
+  "version:major":
     desc: Bump major version (x.0.0)
     cmds:
       - cd setup && npm version major --no-git-tag-version
       - task: version:commit
 
-  version:commit:
+  "version:commit":
     desc: Commit version bump and create tag
     internal: true
     cmds:
       - |
         VERSION=$(node -p "require('./setup/package.json').version")
-        git add setup/package.json
+        git add setup/package.json setup/package-lock.json
         git commit -m "chore: bump version to v$VERSION"
-        git tag "v$VERSION"
-        echo "[OK] Version bumped to v$VERSION"
-        echo "[TAG] Tag created: v$VERSION"
-        echo ""
-        echo "To push changes:"
-        echo "  git push origin main"
-        echo "  git push origin v$VERSION"
+        git push origin main
+        git tag -a "v$VERSION" -m "Release v$VERSION"
+        git push origin "v$VERSION"
+        echo "Tagged and pushed version v$VERSION"
 
   # === Publishing ===
 
-  publish:check:
+  "publish:check":
     desc: Verify package contents before publish
     deps: [build]
     cmds:
@@ -184,7 +181,7 @@ tasks:
       - cd setup && npm pack --dry-run
       - 'echo "[OK] Package check complete"'
 
-  publish:dry:
+  "publish:dry":
     desc: Dry-run npm publish
     deps: [build]
     cmds:
@@ -202,14 +199,14 @@ tasks:
     cmds:
       - tail -f ~/Library/Logs/pai-voice-server.log
 
-  logs:follow:
+  "logs:follow":
     desc: Follow server logs with colors
     cmds:
       - tail -f ~/Library/Logs/pai-voice-server.log | grep --color=auto -E "ERROR|WARN|INFO|$"
 
   # === Utilities ===
 
-  update:global:
+  "update:global":
     desc: Update global pai-voice-server package
     cmds:
       - npm update -g pai-voice-server
