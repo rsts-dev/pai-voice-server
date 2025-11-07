@@ -1,0 +1,280 @@
+version: '3'
+
+vars:
+  PROJECT_NAME: pai-voice-server
+  VERSION:
+    sh: node -p "require('./setup/package.json').version"
+  NODE_VERSION:
+    sh: node -v
+  DIST_DIR: setup/dist
+
+env:
+  NODE_ENV: development
+  FORCE_COLOR: "1"
+
+tasks:
+  # === Setup & Installation ===
+
+  setup:
+    desc: Initialize development environment
+    deps: [install]
+    cmds:
+      - echo "[START] {{.PROJECT_NAME}} v{{.VERSION}}"
+      - echo "[PKG] Node.js {{.NODE_VERSION}}"
+      - echo "[OK] Development environment ready"
+
+  install:
+    desc: Install dependencies
+    internal: true
+    sources:
+      - setup/package.json
+      - setup/package-lock.json
+    generates:
+      - setup/node_modules/.package-lock.json
+    cmds:
+      - cd setup && npm ci
+
+  # === Testing ===
+
+  test:
+    desc: Run all tests
+    deps: [install]
+    cmds:
+      - cd setup && npm test
+
+  test:unit:
+    desc: Run unit tests only
+    deps: [install]
+    cmds:
+      - cd setup && npm run test:unit
+
+  test:integration:
+    desc: Run integration tests only
+    deps: [install]
+    cmds:
+      - cd setup && npm run test:integration
+
+  test:watch:
+    desc: Run tests in watch mode
+    deps: [install]
+    cmds:
+      - cd setup && npm run test:watch
+
+  test:coverage:
+    desc: Run tests with coverage report
+    deps: [install]
+    cmds:
+      - cd setup && npm test -- --coverage
+      - 'echo "[STATS] Coverage report: setup/coverage/index.html"'
+
+  # === Testing CLI Locally ===
+
+  test:install:
+    desc: Test installation locally (npm link)
+    deps: [build]
+    cmds:
+      - 'echo "[LINK] Linking package globally..."'
+      - cd setup && npm link
+      - 'echo "[OK] Package linked. Test with: pai-voice-server --help"'
+
+  test:cli:
+    desc: Test CLI commands with dry-run
+    cmds:
+      - 'echo "[TEST] Testing CLI commands..."'
+      - pai-voice-server --version
+      - pai-voice-server --help
+      - pai-voice-server install --dry-run
+      - pai-voice-server status
+      - 'echo "[OK] CLI tests passed"'
+
+  test:unlink:
+    desc: Remove npm link after testing
+    cmds:
+      - cd setup && npm unlink
+      - 'echo "[OK] Package unlinked"'
+
+  # === Building ===
+
+  build:
+    desc: Build distribution package
+    deps: [clean:build]
+    cmds:
+      - cd setup && npm run build
+      - 'echo "[OK] Build complete - {{.DIST_DIR}}"'
+
+  clean:
+    desc: Clean all build artifacts and logs
+    cmds:
+      - rm -rf {{.DIST_DIR}}
+      - rm -rf setup/node_modules
+      - rm -rf setup/coverage
+      - rm -f setup/.eslintcache
+      - rm -f *.log
+      - 'echo "[OK] Cleaned build artifacts"'
+
+  clean:build:
+    desc: Clean dist directory only
+    internal: true
+    cmds:
+      - rm -rf {{.DIST_DIR}}
+
+  # === Code Quality ===
+
+  lint:
+    desc: Check code style with ESLint
+    deps: [install]
+    cmds:
+      - cd setup && npm run lint
+
+  lint:fix:
+    desc: Auto-fix linting issues
+    deps: [install]
+    cmds:
+      - cd setup && npm run lint:fix
+
+  security:audit:
+    desc: Run security audit
+    deps: [install]
+    cmds:
+      - cd setup && npm audit --audit-level=moderate
+
+  # === Version Management ===
+
+  version:patch:
+    desc: Bump patch version (1.0.x)
+    cmds:
+      - cd setup && npm version patch --no-git-tag-version
+      - task: version:commit
+
+  version:minor:
+    desc: Bump minor version (1.x.0)
+    cmds:
+      - cd setup && npm version minor --no-git-tag-version
+      - task: version:commit
+
+  version:major:
+    desc: Bump major version (x.0.0)
+    cmds:
+      - cd setup && npm version major --no-git-tag-version
+      - task: version:commit
+
+  version:commit:
+    desc: Commit version bump and create tag
+    internal: true
+    cmds:
+      - |
+        VERSION=$(node -p "require('./setup/package.json').version")
+        git add setup/package.json
+        git commit -m "chore: bump version to v$VERSION"
+        git tag "v$VERSION"
+        echo "[OK] Version bumped to v$VERSION"
+        echo "[TAG] Tag created: v$VERSION"
+        echo ""
+        echo "To push changes:"
+        echo "  git push origin main"
+        echo "  git push origin v$VERSION"
+
+  # === Publishing ===
+
+  publish:check:
+    desc: Verify package contents before publish
+    deps: [build]
+    cmds:
+      - 'echo "[PKG] Checking package contents..."'
+      - cd setup && npm pack --dry-run
+      - 'echo "[OK] Package check complete"'
+
+  publish:dry:
+    desc: Dry-run npm publish
+    deps: [build]
+    cmds:
+      - cd setup && npm publish --dry-run
+
+  # === Development ===
+
+  dev:
+    desc: Run server directly for development
+    cmds:
+      - bun run server.ts
+
+  logs:
+    desc: Tail server logs
+    cmds:
+      - tail -f ~/Library/Logs/pai-voice-server.log
+
+  logs:follow:
+    desc: Follow server logs with colors
+    cmds:
+      - tail -f ~/Library/Logs/pai-voice-server.log | grep --color=auto -E "ERROR|WARN|INFO|$"
+
+  # === Utilities ===
+
+  update:global:
+    desc: Update global pai-voice-server package
+    cmds:
+      - npm update -g pai-voice-server
+      - pai-voice-server --version
+
+  analyze:
+    desc: Analyze project structure
+    cmds:
+      - 'echo "[STATS] Project Analysis:"'
+      - echo ""
+      - echo "JavaScript files:"
+      - find setup -name "*.js" | wc -l
+      - echo ""
+      - echo "Total files in setup/:"
+      - find setup -type f | wc -l
+      - echo ""
+      - echo "Lines of code (setup/lib/):"
+      - find setup/lib -name "*.js" -exec wc -l {} + | tail -1
+
+  status:
+    desc: Show server status
+    cmds:
+      - pai-voice-server status
+
+  help:
+    desc: Show detailed help for common workflows
+    cmds:
+      - |
+        echo "[TARGET] PAI Voice Server - Development Tasks"
+        echo ""
+        echo "[DOCS] Common Workflows:"
+        echo ""
+        echo "  Development Setup:"
+        echo "    task setup              # Initialize development environment"
+        echo "    task build              # Build distribution package"
+        echo "    task test:install       # Link package globally for testing"
+        echo ""
+        echo "  Testing:"
+        echo "    task test               # Run all tests"
+        echo "    task test:unit          # Run unit tests only"
+        echo "    task test:integration   # Run integration tests only"
+        echo "    task test:cli           # Test CLI commands"
+        echo "    task test:unlink        # Remove npm link after testing"
+        echo ""
+        echo "  Code Quality:"
+        echo "    task lint               # Check code style"
+        echo "    task lint:fix           # Auto-fix linting issues"
+        echo "    task security:audit     # Run security audit"
+        echo ""
+        echo "  Version Management:"
+        echo "    task version:patch      # Bump patch version (1.0.x)"
+        echo "    task version:minor      # Bump minor version (1.x.0)"
+        echo "    task version:major      # Bump major version (x.0.0)"
+        echo ""
+        echo "  Publishing:"
+        echo "    task publish:check      # Verify package before publish"
+        echo "    task publish:dry        # Dry-run npm publish"
+        echo ""
+        echo "  Development:"
+        echo "    task dev                # Run server directly"
+        echo "    task logs               # Tail server logs"
+        echo "    task status             # Show server status"
+        echo ""
+        echo "  Utilities:"
+        echo "    task clean              # Clean build artifacts"
+        echo "    task analyze            # Analyze project structure"
+        echo ""
+        echo "For more tasks: task --list"

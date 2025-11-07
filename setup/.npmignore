@@ -1,0 +1,27 @@
+# Development files
+*.log
+*.tmp
+.DS_Store
+node_modules/
+
+# Test files
+test/
+*.test.js
+*.spec.js
+
+# Development configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Only include what's in package.json "files" array:
+# - lib/
+# - dist/
+# - install.js
+# - scripts/
+# - README.md

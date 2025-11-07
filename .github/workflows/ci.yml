@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Test (Node ${{ matrix.node }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: [18, 20, 22]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+          cache-dependency-path: setup/package-lock.json
+
+      - name: Install dependencies
+        run: cd setup && npm ci
+
+      - name: Build package
+        run: cd setup && npm run build
+
+      - name: Verify build contents
+        run: |
+          if [ ! -f setup/dist/server.ts ]; then
+            echo "❌ Missing: server.ts"
+            exit 1
+          fi
+          if [ ! -f setup/dist/voices.json ]; then
+            echo "❌ Missing: voices.json"
+            exit 1
+          fi
+          echo "✅ Build verification passed"
+
+      - name: Test CLI help
+        run: node setup/install.js --help
+
+      - name: Test CLI version
+        run: node setup/install.js --version
+
+      - name: Test dry-run installation
+        run: node setup/install.js install --dry-run
+        continue-on-error: true  # May fail on Ubuntu due to missing Bun
+
+      - name: Run tests
+        run: cd setup && npm test
+        if: always()
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: setup/package-lock.json
+
+      - name: Install dependencies
+        run: cd setup && npm ci
+
+      - name: Run linting
+        run: cd setup && npm run lint
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: setup/package-lock.json
+
+      - name: Install dependencies
+        run: cd setup && npm ci
+
+      - name: Run security audit (moderate level)
+        run: cd setup && npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Check for vulnerable dependencies (high level)
+        run: cd setup && npm audit --audit-level=high

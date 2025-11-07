@@ -1,0 +1,77 @@
+# Dependencies
+node_modules/
+setup/node_modules/
+
+# Build output
+setup/dist/
+
+# Test coverage
+setup/coverage/
+*.lcov
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+*.log.*
+
+# OS files
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Environment variables (contains secrets)
+.env
+.env.local
+.env.*.local
+
+# ESLint cache
+.eslintcache
+
+# Jest cache
+.jest-cache/
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# NPM pack files
+*.tgz
+
+# Lock files (keep package-lock.json for reproducibility)
+# Uncomment if using other package managers
+# yarn.lock
+# pnpm-lock.yaml
+
+# macOS service files (generated)
+*.plist.backup
+
+# Backup files
+*.backup
+*.backup-*
+
+# Test files
+*.test.local.js
+
+# Debug files
+debug.log
+trace.log
+
+# Task runner cache (Go Task)
+.task/
+
+# Process ID files
+*.pid
