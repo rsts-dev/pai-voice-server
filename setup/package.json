@@ -40,7 +40,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pai/voice-server.git",
+    "url": "https://github.com/rsts-dev/pai-voice-server.git",
     "directory": "setup"
   },
   "devDependencies": {
